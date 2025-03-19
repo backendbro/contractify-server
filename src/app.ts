@@ -31,14 +31,6 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  if (req.headers["x-forwarded-proto"] !== "https") {
-    console.log("Hello");
-    return res.redirect(`https://${req.headers.host}${req.url}`);
-  }
-  next();
-});
-
 app.use(helmet());
 app.use(morgan("dev"));
 

@@ -28,13 +28,6 @@ app.use((0, cors_1.default)({
     origin: process.env.CLIENT_URL,
     credentials: true,
 }));
-app.use((req, res, next) => {
-    if (req.headers["x-forwarded-proto"] !== "https") {
-        console.log("Hello");
-        return res.redirect(`https://${req.headers.host}${req.url}`);
-    }
-    next();
-});
 app.use((0, helmet_1.default)());
 app.use((0, morgan_1.default)("dev"));
 app.post("/payments/webhook", express_1.default.raw({ type: "application/json" }), payment_controller_1.handleWebhook);
