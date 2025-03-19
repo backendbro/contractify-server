@@ -30,6 +30,7 @@ app.use((0, cors_1.default)({
 }));
 app.use((req, res, next) => {
     if (req.headers["x-forwarded-proto"] !== "https") {
+        console.log("Hello");
         return res.redirect(`https://${req.headers.host}${req.url}`);
     }
     next();
@@ -45,6 +46,7 @@ app.use((0, express_session_1.default)({
     store: connect_mongo_1.default.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
         secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },

@@ -24,8 +24,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error(err));
 
-
-  app.use(
+app.use(
   cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
@@ -34,11 +33,11 @@ mongoose
 
 app.use((req, res, next) => {
   if (req.headers["x-forwarded-proto"] !== "https") {
+    console.log("Hello");
     return res.redirect(`https://${req.headers.host}${req.url}`);
   }
   next();
 });
-
 
 app.use(helmet());
 app.use(morgan("dev"));
@@ -59,7 +58,7 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI! }),
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      httpOnly:true, 
+      httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
