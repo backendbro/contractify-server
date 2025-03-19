@@ -20,12 +20,21 @@ const contracts_1 = __importDefault(require("./routes/contracts"));
 const payments_1 = __importDefault(require("./routes/payments"));
 const payment_controller_1 = require("./controllers/payment.controller");
 const app = (0, express_1.default)();
+// Trust the proxy to ensure proper handling of secure cookies
+app.set("trust proxy", 1);
+app.use((req, res, next) => {
+    if (req.headers["x-forwarded-proto"] !== "https") {
+        console.log("Hello");
+        return res.redirect(`https://${req.headers.host}${req.url}`);
+    }
+    next();
+});
 mongoose_1.default
     .connect(process.env.MONGODB_URI)
     .then(() => console.log("Connected to MongoDB"))
     .catch((err) => console.error(err));
 app.use((0, cors_1.default)({
-    origin: process.env.CLIENT_URL,
+    origin: "https://contractify-inky.vercel.app", // Must match exactly your client URL, e.g., "https://contractify-inky.vercel.app"
     credentials: true,
 }));
 app.use((0, helmet_1.default)());
@@ -38,7 +47,7 @@ app.use((0, express_session_1.default)({
     saveUninitialized: false,
     store: connect_mongo_1.default.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production", // true in production (HTTPS)
         httpOnly: true,
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000, // 24 hours

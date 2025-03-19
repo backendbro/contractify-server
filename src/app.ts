@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-
 dotenv.config();
 import express from "express";
 import cors from "cors";
@@ -19,6 +18,17 @@ import { handleWebhook } from "./controllers/payment.controller";
 
 const app = express();
 
+// Trust the proxy to ensure proper handling of secure cookies
+app.set("trust proxy", 1);
+
+app.use((req, res, next) => {
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    console.log("Hello");
+    return res.redirect(`https://${req.headers.host}${req.url}`);
+  }
+  next();
+});
+
 mongoose
   .connect(process.env.MONGODB_URI!)
   .then(() => console.log("Connected to MongoDB"))
@@ -26,7 +36,7 @@ mongoose
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: "https://contractify-inky.vercel.app", // Must match exactly your client URL, e.g., "https://contractify-inky.vercel.app"
     credentials: true,
   })
 );
@@ -49,7 +59,7 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI! }),
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production", // true in production (HTTPS)
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
